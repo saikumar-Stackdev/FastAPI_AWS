@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from urllib.parse import quote_plus
 
 load_dotenv()
 
@@ -11,8 +12,12 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 TEST_DB_NAME = os.getenv("TEST_DB_NAME")
 
-from urllib.parse import quote_plus
-safe_password = quote_plus(DB_PASSWORD)
+
+if DB_PASSWORD is None:
+    DB_PASSWORD = ""
+
+safe_password = quote_plus(str(DB_PASSWORD))
+
 
 TEST_DATABASE_URL = (
     f"mysql+pymysql://{DB_USER}:{safe_password}@{DB_HOST}:{DB_PORT}/{TEST_DB_NAME}"
