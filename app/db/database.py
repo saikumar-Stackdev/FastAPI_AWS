@@ -1,33 +1,41 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
 import os
-from pathlib import Path
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from urllib.parse import quote_plus
-env_path = Path(__file__).resolve().parent.parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
+
+def get_engine():
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD") or ""
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT") or "3306"
+    db_name = os.getenv("DB_NAME")
+
+    safe_password = quote_plus(str(db_password))
+
+    DATABASE_URL = f"mysql+pymysql://{db_user}:{safe_password}@{db_host}:{db_port}/{db_name}"
+
+    return create_engine(DATABASE_URL)
 
 
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
-safe_password = quote_plus(os.getenv("DB_PASSWORD"))
+def get_session_local():
+    return sessionmaker(autocommit=False, autoflush=False, bind=get_engine())import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from urllib.parse import quote_plus
 
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{safe_password}@{DB_HOST}/{DB_NAME}"
+def get_engine():
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD") or ""
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT") or "3306"
+    db_name = os.getenv("DB_NAME")
 
-engine = create_engine(DATABASE_URL)
+    safe_password = quote_plus(str(db_password))
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    DATABASE_URL = f"mysql+pymysql://{db_user}:{safe_password}@{db_host}:{db_port}/{db_name}"
 
-from sqlalchemy.orm import Session
+    return create_engine(DATABASE_URL)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-Base = declarative_base()
+def get_session_local():
+    return sessionmaker(autocommit=False, autoflush=False, bind=get_engine())
