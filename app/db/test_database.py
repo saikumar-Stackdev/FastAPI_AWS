@@ -1,24 +1,28 @@
-import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+TEST_DB_NAME = os.getenv("TEST_DB_NAME")
+
 from urllib.parse import quote_plus
+safe_password = quote_plus(DB_PASSWORD)
 
-def get_test_engine():
-    db_user = os.getenv("DB_USER", "root")
-    db_password = os.getenv("DB_PASSWORD", "")  # safe fallback
-    db_host = os.getenv("DB_HOST", "127.0.0.1")
-    db_port = os.getenv("DB_PORT", "3306")
-    db_name = os.getenv("TEST_DB_NAME", "fastapi_test_db")
+TEST_DATABASE_URL = (
+    f"mysql+pymysql://{DB_USER}:{safe_password}@{DB_HOST}:{DB_PORT}/{TEST_DB_NAME}"
+)
 
-    safe_password = quote_plus(str(db_password))
-
-    url = f"mysql+pymysql://{db_user}:{safe_password}@{db_host}:{db_port}/{db_name}"
-
-    return create_engine(url)
-
+engine = create_engine(TEST_DATABASE_URL)
 
 TestingSessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=get_test_engine()
+    bind=engine
 )
