@@ -1,0 +1,22 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: fastapi_db
+      MYSQL_ROOT_PASSWORD: Login@123!!!
+    ports:
+      - "3307:3306"
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=Login@123!!!
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=fastapi_db
+    depends_on:
+      - db
